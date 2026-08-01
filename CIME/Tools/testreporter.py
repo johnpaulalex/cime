@@ -181,7 +181,7 @@ def get_testreporter_xml(testroot, testid, tagname, testtype):
                 if line[0:4] in ("FAIL", "PEND"):
                     test_status["COMMENT"] += "SUBMIT fail! "
                     break
-            if "RUN" in line:
+            if "RUN" in line or "SCHEDULE_RUN" in line:
                 test_status["STATUS"] = line[0:4]
                 if line[0:4] in ("FAIL", "PEND"):
                     test_status["COMMENT"] += "RUN fail! "

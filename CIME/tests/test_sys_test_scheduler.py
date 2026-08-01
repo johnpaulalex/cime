@@ -51,7 +51,7 @@ class TestTestScheduler(base.BaseTestCase):
             _shell_cmd_for_phase.assert_called_with(
                 "SEQ_Ln9.f19_g16.A.perlmutter_gnu",
                 "./case.submit --skip-preview-namelist --chksum",
-                "RUN",
+                "SCHEDULE_RUN",
                 from_dir="/tests/SEQ_Ln9.f19_g16.A.perlmutter_gnu.00:00:00",
             )
 

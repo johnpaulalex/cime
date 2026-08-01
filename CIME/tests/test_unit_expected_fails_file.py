@@ -22,7 +22,7 @@ class TestExpectedFailsFile(unittest.TestCase):
         contents = """<?xml version= "1.0"?>
 <expectedFails version="1.1">
   <test name="my.test.1">
-    <phase name="RUN">
+    <phase name="SCHEDULE_RUN">
       <status>FAIL</status>
       <issue>#404</issue>
     </phase>
@@ -50,7 +50,7 @@ class TestExpectedFailsFile(unittest.TestCase):
         xfails = expected_fails_file.get_expected_fails()
 
         expected_test1 = ExpectedFails()
-        expected_test1.add_failure("RUN", "FAIL")
+        expected_test1.add_failure("SCHEDULE_RUN", "FAIL")
         expected_test1.add_failure("COMPARE_base_rest", "PEND")
         expected_test2 = ExpectedFails()
         expected_test2.add_failure("GENERATE", "FAIL")
@@ -68,7 +68,7 @@ class TestExpectedFailsFile(unittest.TestCase):
         contents = """<?xml version= "1.0"?>
 <expectedFails version="1.1">
   <test name="my.test.1">
-    <phase name="RUN">
+    <phase name="SCHEDULE_RUN">
       <status>FAIL</status>
       <issue>#404</issue>
     </phase>
@@ -88,7 +88,7 @@ class TestExpectedFailsFile(unittest.TestCase):
         xfails = expected_fails_file.get_expected_fails()
 
         expected_test1 = ExpectedFails()
-        expected_test1.add_failure("RUN", "FAIL")
+        expected_test1.add_failure("SCHEDULE_RUN", "FAIL")
         expected_test1.add_failure("COMPARE_base_rest", "PEND")
         expected = {"my.test.1": expected_test1}
 
@@ -104,7 +104,7 @@ class TestExpectedFailsFile(unittest.TestCase):
         contents = """<?xml version= "1.0"?>
 <expectedFails version="1.1">
   <test name="my.test.1">
-    <phase name="RUN">
+    <phase name="SCHEDULE_RUN">
     </phase>
   </test>
 </expectedFails>
