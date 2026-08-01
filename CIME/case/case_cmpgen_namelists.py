@@ -47,7 +47,9 @@ def _do_full_nl_comp(case, test, compare_name, baseline_root=None):
             os.path.basename(item),
         )
         if not os.path.exists(baseline_counterpart):
-            # Special case for mizuRoute TOML migration: tolerate one missing twin if the other exists
+            # TEMPORARY FIX: Special case for mizuRoute TOML migration.
+            # This tolerates a missing twin config file during the transition phase.
+            # TODO: Remove this entire block once all CIME baselines have been updated to native TOML (.toml) and the legacy (.control) baselines are gone.
             b_name = os.path.basename(item)
             b_dir = os.path.dirname(baseline_counterpart)
             if b_name == "mizuroute.toml" and os.path.exists(os.path.join(b_dir, "mizuRoute.control")):
