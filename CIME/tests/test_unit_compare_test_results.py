@@ -64,7 +64,7 @@ class TestCaseFake(unittest.TestCase):
 
         phases = [
             (SETUP_PHASE, "PASS"),
-            (RUN_PHASE, "PASS"),
+            (SCHEDULE_RUN_PHASE, "PASS"),
         ]
 
         self._compare_test_results(
@@ -77,7 +77,7 @@ class TestCaseFake(unittest.TestCase):
 
         phases = [
             (SETUP_PHASE, "PASS"),
-            (RUN_PHASE, "PASS"),
+            (SCHEDULE_RUN_PHASE, "PASS"),
         ]
 
         self._compare_test_results("test1", "test-baseline", phases, hist_only=True)
@@ -98,7 +98,7 @@ class TestCaseFake(unittest.TestCase):
 
         phases = [
             (SETUP_PHASE, "PASS"),
-            (RUN_PHASE, "PASS"),
+            (SCHEDULE_RUN_PHASE, "PASS"),
         ]
 
         self._compare_test_results("test1", "test-baseline", phases)

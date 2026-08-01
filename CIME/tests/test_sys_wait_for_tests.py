@@ -65,20 +65,20 @@ class TestWaitForTests(base.BaseTestCase):
                     os.path.join(testdir, str(r)),
                     "Test_%d" % r,
                     test_status.TEST_PASS_STATUS,
-                    test_status.RUN_PHASE,
+                    test_status.SCHEDULE_RUN_PHASE,
                 )
 
         test_utils.make_fake_teststatus(
             os.path.join(self._testdir_with_fail, "5"),
             "Test_5",
             test_status.TEST_FAIL_STATUS,
-            test_status.RUN_PHASE,
+            test_status.SCHEDULE_RUN_PHASE,
         )
         test_utils.make_fake_teststatus(
             os.path.join(self._testdir_unfinished, "5"),
             "Test_5",
             test_status.TEST_PEND_STATUS,
-            test_status.RUN_PHASE,
+            test_status.SCHEDULE_RUN_PHASE,
         )
         test_utils.make_fake_teststatus(
             os.path.join(self._testdir_unfinished2, "5"),
@@ -183,7 +183,7 @@ class TestWaitForTests(base.BaseTestCase):
         with test_status.TestStatus(
             test_dir=os.path.join(self._testdir_unfinished, "5")
         ) as ts:
-            ts.set_status(test_status.RUN_PHASE, test_status.TEST_PASS_STATUS)
+            ts.set_status(test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS)
 
         run_thread.join(timeout=10)
 
@@ -210,7 +210,7 @@ class TestWaitForTests(base.BaseTestCase):
         with test_status.TestStatus(
             test_dir=os.path.join(self._testdir_unfinished2, "5")
         ) as ts:
-            ts.set_status(test_status.RUN_PHASE, test_status.TEST_PASS_STATUS)
+            ts.set_status(test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS)
 
         run_thread.join(timeout=10)
 
@@ -371,7 +371,7 @@ class TestWaitForTests(base.BaseTestCase):
         self.live_test_impl(
             self._testdir_teststatus1,
             ["PASS"],
-            test_status.RUN_PHASE,
+            test_status.SCHEDULE_RUN_PHASE,
             test_status.TEST_PASS_STATUS,
         )
 

@@ -10,7 +10,7 @@ context manager. Example:
 .. code-block:: python
 
     with TestStatus(test_dir=caseroot) as ts:
-        ts.set_status(RUN_PHASE, TEST_PASS_STATUS)
+        ts.set_status(SCHEDULE_RUN_PHASE, TEST_PASS_STATUS)
 
 This file also contains all of the hardcoded phase information which includes
 the phase names, phase orders, potential phase states, and which phases are
@@ -62,7 +62,7 @@ NAMELIST_PHASE = "NLCOMP"
 SHAREDLIB_BUILD_PHASE = "SHAREDLIB_BUILD"
 MODEL_BUILD_PHASE = "MODEL_BUILD"
 SUBMIT_PHASE = "SUBMIT"
-RUN_PHASE = "SCHEDULE_RUN"
+SCHEDULE_RUN_PHASE = "SCHEDULE_RUN"
 THROUGHPUT_PHASE = "TPUTCOMP"
 MEMCOMP_PHASE = "MEMCOMP"
 MEMLEAK_PHASE = "MEMLEAK"
@@ -79,7 +79,7 @@ ALL_PHASES = [
     SHAREDLIB_BUILD_PHASE,
     MODEL_BUILD_PHASE,
     SUBMIT_PHASE,
-    RUN_PHASE,
+    SCHEDULE_RUN_PHASE,
     COMPARE_PHASE,
     BASELINE_PHASE,
     THROUGHPUT_PHASE,
@@ -97,7 +97,7 @@ CORE_PHASES = [
     SHAREDLIB_BUILD_PHASE,
     MODEL_BUILD_PHASE,
     SUBMIT_PHASE,
-    RUN_PHASE,
+    SCHEDULE_RUN_PHASE,
 ]
 
 
@@ -433,10 +433,10 @@ class TestStatus(object):
             ):
                 phase_responsible_for_status = phase
 
-            if phase == RUN_PHASE:
+            if phase == SCHEDULE_RUN_PHASE:
                 run_phase_found = True
 
-            if phase in [SUBMIT_PHASE, RUN_PHASE] and no_run:
+            if phase in [SUBMIT_PHASE, SCHEDULE_RUN_PHASE] and no_run:
                 break
 
             if status == TEST_PEND_STATUS and rv in [
@@ -491,7 +491,7 @@ class TestStatus(object):
             and not run_phase_found
             and wait_for_run
         ):
-            phase_responsible_for_status = RUN_PHASE
+            phase_responsible_for_status = SCHEDULE_RUN_PHASE
             rv = TEST_PEND_STATUS
 
         return rv, phase_responsible_for_status

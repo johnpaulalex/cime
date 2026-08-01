@@ -86,8 +86,8 @@ class SystemTestsCompareTwoFake(SystemTestsCompareTwo):
         """
         Initialize a SystemTestsCompareTwoFake object
 
-        The core test phases prior to RUN_PHASE are set to TEST_PASS_STATUS;
-        RUN_PHASE is left unset (as is any later phase)
+        The core test phases prior to SCHEDULE_RUN_PHASE are set to TEST_PASS_STATUS;
+        SCHEDULE_RUN_PHASE is left unset (as is any later phase)
 
         Args:
             case1 (CaseFake): existing case
@@ -131,7 +131,7 @@ class SystemTestsCompareTwoFake(SystemTestsCompareTwo):
         # phase status)
         with self._test_status:
             for phase in test_status.CORE_PHASES:
-                if phase == test_status.RUN_PHASE:
+                if phase == test_status.SCHEDULE_RUN_PHASE:
                     break
                 self._test_status.set_status(phase, test_status.TEST_PASS_STATUS)
 
@@ -302,25 +302,25 @@ class TestSystemTestsCompareTwo(unittest.TestCase):
         case1.get_value = mock.MagicMock()
         case1.get_value.side_effect = ["/tmp", "/tmp/bld", False]
 
-        mytest._resetup_case(test_status.RUN_PHASE, reset=True)
+        mytest._resetup_case(test_status.SCHEDULE_RUN_PHASE, reset=True)
 
         case1.set_value.assert_not_called()
 
         case1.get_value.side_effect = ["/tmp", "/tmp/bld", True]
 
-        mytest._resetup_case(test_status.RUN_PHASE, reset=True)
+        mytest._resetup_case(test_status.SCHEDULE_RUN_PHASE, reset=True)
 
         case1.set_value.assert_not_called()
 
         case1.get_value.side_effect = ["/tmp", "/other/bld", False]
 
-        mytest._resetup_case(test_status.RUN_PHASE, reset=True)
+        mytest._resetup_case(test_status.SCHEDULE_RUN_PHASE, reset=True)
 
         case1.set_value.assert_not_called()
 
         case1.get_value.side_effect = ["/tmp", "/other/bld", True]
 
-        mytest._resetup_case(test_status.RUN_PHASE, reset=True)
+        mytest._resetup_case(test_status.SCHEDULE_RUN_PHASE, reset=True)
 
         case1.set_value.assert_called_with("BUILD_COMPLETE", True)
 
@@ -425,7 +425,7 @@ class TestSystemTestsCompareTwo(unittest.TestCase):
         # Verify
         self.assertEqual(
             test_status.TEST_PASS_STATUS,
-            mytest._test_status.get_status(test_status.RUN_PHASE),
+            mytest._test_status.get_status(test_status.SCHEDULE_RUN_PHASE),
         )
 
     def test_run_phase_internal_calls(self):
@@ -605,7 +605,7 @@ class TestSystemTestsCompareTwo(unittest.TestCase):
         # Verify
         self.assertEqual(
             test_status.TEST_FAIL_STATUS,
-            mytest._test_status.get_status(test_status.RUN_PHASE),
+            mytest._test_status.get_status(test_status.SCHEDULE_RUN_PHASE),
         )
 
     def test_run2_fails(self):
@@ -625,7 +625,7 @@ class TestSystemTestsCompareTwo(unittest.TestCase):
         # Verify
         self.assertEqual(
             test_status.TEST_FAIL_STATUS,
-            mytest._test_status.get_status(test_status.RUN_PHASE),
+            mytest._test_status.get_status(test_status.SCHEDULE_RUN_PHASE),
         )
 
     def test_compare_passes(self):

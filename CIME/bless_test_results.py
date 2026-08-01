@@ -577,7 +577,7 @@ def is_hist_bless_needed(
 ):
     needed = False
 
-    run_result = ts.get_status(RUN_PHASE)
+    run_result = ts.get_status(SCHEDULE_RUN_PHASE)
 
     if run_result is None:
         broken_blesses.append((test_name, "no run phase"))

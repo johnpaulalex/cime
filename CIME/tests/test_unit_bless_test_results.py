@@ -1004,7 +1004,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         # get_status() calls in is_hist_bless_needed()
         ts.get_status.side_effect = [
-            "PASS",  # Check of RUN_PHASE at top of function
+            "PASS",  # Check of SCHEDULE_RUN_PHASE at top of function
             "PASS",  # Check of GENERATE_PHASE
         ]
 
@@ -1022,7 +1022,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         # First two get_status() calls in is_hist_bless_needed()
         side_effect = [
-            "PASS",  # Check of RUN_PHASE at top of function
+            "PASS",  # Check of SCHEDULE_RUN_PHASE at top of function
             "FAIL",  # Check of GENERATE_PHASE
         ]
         # Checks in `for p in ALL_PHASES` loop
