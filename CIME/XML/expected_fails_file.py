@@ -47,6 +47,7 @@ from CIME.XML.standard_module_setup import *
 from CIME import utils
 from CIME.XML.generic_xml import GenericXML
 from CIME.expected_fails import ExpectedFails
+from CIME.test_status import SCHEDULE_RUN_PHASE
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,6 @@ class ExpectedFailsFile(GenericXML):
             for pnode in phase_nodes:
                 phase_name = self.attrib(pnode)["name"]
                 if phase_name == "RUN":
-                    from CIME.test_status import SCHEDULE_RUN_PHASE
                     phase_name = SCHEDULE_RUN_PHASE
                 status_node = self.get_child("status", root=pnode)
                 status = self.text(status_node)
