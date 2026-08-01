@@ -47,6 +47,14 @@ def _do_full_nl_comp(case, test, compare_name, baseline_root=None):
             os.path.basename(item),
         )
         if not os.path.exists(baseline_counterpart):
+            # Special case for mizuRoute TOML migration: tolerate one missing twin if the other exists
+            b_name = os.path.basename(item)
+            b_dir = os.path.dirname(baseline_counterpart)
+            if b_name == "mizuroute.toml" and os.path.exists(os.path.join(b_dir, "mizuRoute.control")):
+                continue
+            if b_name == "mizuRoute.control" and os.path.exists(os.path.join(b_dir, "mizuroute.toml")):
+                continue
+
             comments += "Missing baseline namelist '{}'\n".format(baseline_counterpart)
             all_match = False
         else:
