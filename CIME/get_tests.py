@@ -323,9 +323,13 @@ def get_build_groups(tests):
     >>> get_build_groups(tests2)
     [('SMS_P8.f45_g37.A.melvin_gnu', 'SMS_P2.f45_g37.A.melvin_gnu', 'SMS_P4.f45_g37.A.melvin_gnu', 'SMS_P16.f45_g37.A.melvin_gnu')]
     """
-    #
+    # `share_suites` is a manually configured list of test suites that are guaranteed
+    # by the developer to safely share a build directory, even if their `caseopts`
+    # or `testmods` appear different. This acts as an optimization override for
+    # tests that compile identically but differ in runtime configuration.
+    # We prioritize this first pass, and rely on a strict dynamic grouping pass later.
+    
     # Get share suites and their designated build leaders (if any)
-    #
     suites = get_test_suites()
     share_suites = []  # list of suites with exe sharing on
     # suite -> short test name for specified leader if provided
@@ -370,33 +374,51 @@ def get_build_groups(tests):
             build_groups.append(([test], my_share_suites))
 
     #
-    # Reorder each group to put the designated build leader first (string share)
+    # Reorder each group from shared suites to put the designated build leader first (string share)
+    # and perform a second pass to dynamically group independent tests by configuration
     #
     final_groups = []
+    dynamic_group_map = {}  # maps configuration tuple to a build_group list
+
     for group_tests, group_suites in build_groups:
-        # Due to transitivity, if there are multiple build leaders, we can
-        # just pick the first one.
-        leader_short = None
-        for suite in sorted(group_suites):
-            if suite in share_suite_leaders:
-                leader_short = share_suite_leaders[suite]
-                break
-
-        # If a designate build leader was found, ensure it comes first in the group
-        if leader_short is not None:
-            for i, t in enumerate(group_tests):
-                if _short_test_name(t) == leader_short:
-                    group_tests.insert(0, group_tests.pop(i))
+        if group_suites:
+            # Tests from shared suites remain grouped as-is
+            # Due to transitivity, if there are multiple build leaders, we can
+            # just pick the first one.
+            leader_short = None
+            for suite in sorted(group_suites):
+                if suite in share_suite_leaders:
+                    leader_short = share_suite_leaders[suite]
                     break
-            else:
-                expect(
-                    False,
-                    f"Designated share build leader '{leader_short}' not found in build group {group_tests}",
-                )
 
-        final_groups.append(tuple(group_tests))
+            # If a designate build leader was found, ensure it comes first in the group
+            if leader_short is not None:
+                for i, t in enumerate(group_tests):
+                    if _short_test_name(t) == leader_short:
+                        group_tests.insert(0, group_tests.pop(i))
+                        break
+                else:
+                    expect(
+                        False,
+                        f"Designated share build leader '{leader_short}' not found in build group {group_tests}",
+                    )
 
-    return final_groups
+            final_groups.append(tuple(group_tests))
+        else:
+            # Independent tests (e.g. ad-hoc or from non-shared suites)
+            for test in group_tests:
+                _, caseopts, grid, compset, machine, compiler, testmods = parse_test_name(test)
+                caseopts_tuple = tuple(caseopts) if caseopts is not None else None
+                testmods_tuple = tuple(testmods) if testmods is not None else None
+                config_key = (grid, compset, machine, compiler, caseopts_tuple, testmods_tuple)
+                
+                if config_key not in dynamic_group_map:
+                    dynamic_group_map[config_key] = []
+                    final_groups.append(dynamic_group_map[config_key])
+                
+                dynamic_group_map[config_key].append(test)
+
+    return [tuple(bg) for bg in final_groups]
 
 
 ###############################################################################

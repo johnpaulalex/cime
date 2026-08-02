@@ -160,3 +160,90 @@ class TestGetBuildGroupsShare:
                         "SMS_P4.f19_g16.A.melvin_gnu",
                     ]
                 )
+
+# ---------------------------------------------------------------------------
+# get_build_groups – dynamic grouping behaviour
+# ---------------------------------------------------------------------------
+
+class TestGetBuildGroupsDynamicGrouping:
+    """Tests for dynamic configuration-based grouping in get_build_groups."""
+
+    def test_dynamic_grouping_by_exact_config(self):
+        """Independent tests with the exact same configuration are grouped together."""
+        tests = [
+            "SMS.f19_g16.A.melvin_gnu",
+            "ERS.f19_g16.A.melvin_gnu",
+            "ERP.f19_g16.A.melvin_gnu",
+            "SMS.ne30_g16.A.melvin_gnu",
+            "ERS.ne30_g16.A.melvin_gnu"
+        ]
+        
+        # We assume none of these tests are in a share suite for this test case
+        with mock.patch("CIME.get_tests.get_test_suites", return_value=[]):
+            groups = get_build_groups(tests)
+        
+        # We expect 2 groups based on the grid/compset/machine/compiler tuple
+        assert len(groups) == 2
+        
+        # Check that the grouping is correct
+        group1 = tuple(["SMS.f19_g16.A.melvin_gnu", "ERS.f19_g16.A.melvin_gnu", "ERP.f19_g16.A.melvin_gnu"])
+        group2 = tuple(["SMS.ne30_g16.A.melvin_gnu", "ERS.ne30_g16.A.melvin_gnu"])
+        
+        assert group1 in groups
+        assert group2 in groups
+
+    def test_dynamic_grouping_different_caseopts(self):
+        """Tests with different caseopts are NOT grouped together."""
+        tests = [
+            "SMS.f19_g16.A.melvin_gnu",
+            "SMS.f19_g16.A.melvin_gnu.O1",
+            "SMS.f19_g16.A.melvin_gnu.O2"
+        ]
+        
+        with mock.patch("CIME.get_tests.get_test_suites", return_value=[]):
+            groups = get_build_groups(tests)
+            
+        assert len(groups) == 3
+        assert all(len(g) == 1 for g in groups)
+
+    def test_dynamic_grouping_different_testmods(self):
+        """Tests with different testmods are NOT grouped together."""
+        tests = [
+            "SMS.f19_g16.A.melvin_gnu",
+            "SMS.f19_g16.A.melvin_gnu-testmod1",
+            "SMS.f19_g16.A.melvin_gnu-testmod2"
+        ]
+        
+        with mock.patch("CIME.get_tests.get_test_suites", return_value=[]):
+            groups = get_build_groups(tests)
+            
+        assert len(groups) == 3
+        assert all(len(g) == 1 for g in groups)
+
+    def test_combo_shared_and_dynamic(self):
+        """Tests that shared suites and dynamic grouping work together correctly."""
+        tests = [
+            "SMS_P2.f19_g16.A.melvin_gnu",
+            "SMS_P4.f19_g16.A.melvin_gnu",
+            "ERS.ne30_g16.A.melvin_gnu",
+            "ERP.ne30_g16.A.melvin_gnu"
+        ]
+        
+        mock_tests = {
+            "MY_SHARE_SUITE": {"share": True, "tests": ("SMS_P2.f19_g16.A", "SMS_P4.f19_g16.A")},
+            "ERS": {"share": False, "tests": ("ERS.ne30_g16.A",)},
+            "ERP": {"share": False, "tests": ("ERP.ne30_g16.A",)},
+        }
+        
+        with mock.patch.dict(get_tests_module._ALL_TESTS, mock_tests, clear=True):
+            groups = get_build_groups(tests)
+            
+        assert len(groups) == 2
+        
+        # Verify the shared group (transitive grouping could result in either order)
+        shared_group_set = set(["SMS_P2.f19_g16.A.melvin_gnu", "SMS_P4.f19_g16.A.melvin_gnu"])
+        assert any(set(g) == shared_group_set for g in groups)
+        
+        # Verify the dynamic group
+        dynamic_group = tuple(["ERS.ne30_g16.A.melvin_gnu", "ERP.ne30_g16.A.melvin_gnu"])
+        assert dynamic_group in groups
