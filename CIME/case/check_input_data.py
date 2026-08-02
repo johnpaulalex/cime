@@ -7,6 +7,22 @@ from CIME.XML.inputdata import Inputdata
 import CIME.Servers
 
 import glob, hashlib, shutil
+from enum import Enum, auto
+
+class TaskType(Enum):
+    RUNDIR = auto()
+    STANDARD = auto()
+
+class DownloadTask:
+    def __init__(self, task_type, msg, full_path, rel_path, isdirectory, use_ic_path=False, rundir=None):
+        self.type = task_type
+        self.msg = msg
+        self.full_path = full_path
+        self.rel_path = rel_path
+        self.isdirectory = isdirectory
+        self.use_ic_path = use_ic_path
+        self.rundir = rundir
+
 
 logger = logging.getLogger(__name__)
 # The inputdata_checksum.dat file will be read into this hash if it's available
@@ -435,6 +451,9 @@ def _check_input_data_impl(
         if not server:
             return None
 
+    missing_tasks = []
+    seen_paths = set()
+
     for data_list_file in data_list_files:
         logger.info("Loading input file list: '{}'".format(data_list_file))
         with open(data_list_file, "r") as fd:
@@ -498,34 +517,27 @@ def _check_input_data_impl(
                             # Data download path must be DIN_LOC_ROOT, DIN_LOC_IC or RUNDIR
 
                             rundir = case.get_value("RUNDIR")
-                            if download:
-                                if full_path.startswith(rundir):
-                                    print(msg)
-                                    filepath = os.path.dirname(full_path)
-                                    if not os.path.exists(filepath):
-                                        logger.info(
-                                            "Creating directory {}".format(filepath)
-                                        )
-                                        os.makedirs(filepath)
-                                    tmppath = full_path[len(rundir) + 1 :]
-                                    success = _download_if_in_repo(
-                                        server,
-                                        os.path.join(rundir, "inputdata"),
-                                        tmppath[10:],
+                            if full_path.startswith(rundir):
+                                if full_path not in seen_paths:
+                                    seen_paths.add(full_path)
+                                    missing_tasks.append(DownloadTask(
+                                        task_type=TaskType.RUNDIR,
+                                        msg=msg,
+                                        full_path=full_path,
+                                        rel_path=rel_path,
                                         isdirectory=isdirectory,
-                                        ic_filepath="/",
-                                    )
-                                    no_files_missing = success
-                                else:
-                                    # Ensure that msg and warning text are together in TestStatus.log
+                                        rundir=rundir
+                                    ))
+                            else:
+                                if download:
                                     logger.warning(
                                         msg
                                         + "\n    Cannot download file since it lives outside of the input_data_root '{}'".format(
                                             input_data_root
                                         )
                                     )
-                            else:
-                                print(msg)
+                                else:
+                                    print(msg)
                                 no_files_missing = False
                         else:
                             logger.debug("  Found input file: '{}'".format(full_path))
@@ -542,39 +554,19 @@ def _check_input_data_impl(
                             and not os.path.exists(full_path)
                             and not full_path.startswith("unknown")
                         ):
-                            print(
-                                "Model {} missing file {} = '{}'".format(
-                                    model, description, full_path
-                                )
+                            msg = "Model {} missing file {} = '{}'".format(
+                                model, description, full_path
                             )
-                            if download:
-                                if use_ic_path:
-                                    success = _download_if_in_repo(
-                                        server,
-                                        input_ic_root,
-                                        rel_path.strip(os.sep),
-                                        isdirectory=isdirectory,
-                                        ic_filepath=ic_filepath,
-                                    )
-                                else:
-                                    success = _download_if_in_repo(
-                                        server,
-                                        input_data_root,
-                                        rel_path.strip(os.sep),
-                                        isdirectory=isdirectory,
-                                        ic_filepath=ic_filepath,
-                                    )
-                                if not success:
-                                    no_files_missing = False
-                                if success and chksum:
-                                    verify_chksum(
-                                        input_data_root,
-                                        rundir,
-                                        rel_path.strip(os.sep),
-                                        isdirectory,
-                                    )
-                            else:
-                                no_files_missing = False
+                            if full_path not in seen_paths:
+                                seen_paths.add(full_path)
+                                missing_tasks.append(DownloadTask(
+                                    task_type=TaskType.STANDARD,
+                                    msg=msg,
+                                    full_path=full_path,
+                                    rel_path=rel_path,
+                                    isdirectory=isdirectory,
+                                    use_ic_path=use_ic_path
+                                ))
                         else:
                             if chksum:
                                 verify_chksum(
@@ -597,7 +589,64 @@ def _check_input_data_impl(
                         "Model {} no file specified for {}".format(model, description)
                     )
 
+    if missing_tasks:
+        for task in missing_tasks:
+            msg = task.msg
+            if not download:
+                print(msg)
+                no_files_missing = False
+            else:
+                success = False
+
+                if task.type == TaskType.RUNDIR:
+                    full_path = task.full_path
+                    rundir = task.rundir
+                    isdirectory = task.isdirectory
+                    filepath = os.path.dirname(full_path)
+                    if not os.path.exists(filepath):
+                        logger.info("Creating directory {}".format(filepath))
+                        os.makedirs(filepath)
+                    tmppath = full_path[len(rundir) + 1 :]
+                    success = _download_if_in_repo(
+                        server,
+                        os.path.join(rundir, "inputdata"),
+                        tmppath[10:],
+                        isdirectory=isdirectory,
+                        ic_filepath="/",
+                    )
+                elif task.type == TaskType.STANDARD:
+                    use_ic_path = task.use_ic_path
+                    rel_path = task.rel_path
+                    isdirectory = task.isdirectory
+                    if use_ic_path:
+                        success = _download_if_in_repo(
+                            server,
+                            input_ic_root,
+                            rel_path.strip(os.sep),
+                            isdirectory=isdirectory,
+                            ic_filepath=ic_filepath,
+                        )
+                    else:
+                        success = _download_if_in_repo(
+                            server,
+                            input_data_root,
+                            rel_path.strip(os.sep),
+                            isdirectory=isdirectory,
+                            ic_filepath=ic_filepath,
+                        )
+                    if success and chksum:
+                        verify_chksum(
+                            input_data_root,
+                            rundir,
+                            rel_path.strip(os.sep),
+                            isdirectory,
+                        )
+
+                if not success:
+                    no_files_missing = False
+
     return no_files_missing
+
 
 
 def check_input_data(
