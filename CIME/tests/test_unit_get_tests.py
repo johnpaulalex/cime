@@ -75,6 +75,18 @@ class TestGetTestDataShare:
 class TestGetBuildGroupsShare:
     """Tests for share-related behaviour in get_build_groups."""
 
+    @pytest.fixture(autouse=True)
+    def mock_all_tests(self):
+        mock_tests = {
+            "SMS_P2": {"share": True, "tests": ("SMS_P2.f19_g16.A", "SMS_P2.f45_g37.A")},
+            "SMS_P4": {"share": True, "tests": ("SMS_P4.f19_g16.A", "SMS_P4.f45_g37.A")},
+            "SMS_P8": {"share": "SMS_P8.f45_g37.A", "tests": ("SMS_P8.f45_g37.A",)},
+            "SMS_P16": {"share": "SMS_P8.f45_g37.A", "tests": ("SMS_P16.f45_g37.A",)},
+            "TESTRUNSLOWPASS_P1": {"share": False, "tests": ("TESTRUNSLOWPASS_P1.f19_g16.A", "TESTRUNSLOWPASS_P1.ne30_g16.A")},
+        }
+        with mock.patch.dict(get_tests_module._ALL_TESTS, mock_tests, clear=True):
+            yield
+
     def test_share_true_first_in_order_is_leader(self):
         """share=True: first test in input order is the build leader."""
         tests = [

@@ -9,26 +9,49 @@ import CIME.Servers
 import glob, hashlib, shutil, time
 from enum import Enum, auto
 
-class TaskType(Enum):
-    """
-    Indicates how the missing file should be handled during the download phase.
-    """
-    RUNDIR = auto()    # The file belongs in the run directory (e.g. for creating a directory structure in rundir/inputdata)
-    STANDARD = auto()  # The file belongs in the standard input data root or initial condition (IC) root
-
 class DownloadTask:
     """
-    Represents a missing file that needs to be downloaded.
+    Represents a missing file that needs to be downloaded, containing all 
+    pre-computed parameters required by _download_if_in_repo.
     """
-    def __init__(self, task_type, msg, full_path, rel_path, isdirectory, use_ic_path=False, rundir=None):
-        self.type = task_type
+    def __init__(self, msg, input_dir, rel_path, isdirectory, ic_filepath, verify_chksum_args=None, pre_create_dir=None):
         self.msg = msg
-        self.full_path = full_path
+        self.input_dir = input_dir
         self.rel_path = rel_path
         self.isdirectory = isdirectory
-        # The following fields apply only to specific TaskTypes:
-        self.use_ic_path = use_ic_path # Applies to TaskType.STANDARD: indicates if file belongs in input_ic_root rather than input_data_root
-        self.rundir = rundir           # Applies to TaskType.RUNDIR: the path to the run directory
+        self.ic_filepath = ic_filepath
+        # The following fields apply only to specific scenarios:
+        self.verify_chksum_args = verify_chksum_args # Applies if the file needs a checksum verification (tuple of args)
+        self.pre_create_dir = pre_create_dir         # Applies if a directory must be created before download
+
+    @classmethod
+    def from_rundir(cls, msg, full_path, isdirectory, rundir):
+        """Creates a task for files that belong in the run directory."""
+        filepath = os.path.dirname(full_path)
+        tmppath = full_path[len(rundir) + 1 :]
+        return cls(
+            msg=msg,
+            input_dir=os.path.join(rundir, "inputdata"),
+            rel_path=tmppath[10:],
+            isdirectory=isdirectory,
+            ic_filepath="/",
+            pre_create_dir=filepath
+        )
+
+    @classmethod
+    def from_standard(cls, msg, rel_path, isdirectory, use_ic_path, input_ic_root, input_data_root, ic_filepath, chksum, rundir):
+        """Creates a task for files in the standard input data or IC root."""
+        verify_args = None
+        if chksum:
+            verify_args = (input_data_root, rundir, rel_path.strip(os.sep), isdirectory)
+        return cls(
+            msg=msg,
+            input_dir=input_ic_root if use_ic_path else input_data_root,
+            rel_path=rel_path.strip(os.sep),
+            isdirectory=isdirectory,
+            ic_filepath=ic_filepath,
+            verify_chksum_args=verify_args
+        )
 
 
 logger = logging.getLogger(__name__)
@@ -531,17 +554,16 @@ def _check_input_data_impl(
                             if full_path.startswith(rundir):
                                 if full_path not in seen_paths:
                                     seen_paths.add(full_path)
-                                    missing_tasks.append(DownloadTask(
-                                        task_type=TaskType.RUNDIR,
+                                    missing_tasks.append(DownloadTask.from_rundir(
                                         msg=msg,
                                         full_path=full_path,
-                                        rel_path=rel_path,
                                         isdirectory=isdirectory,
                                         rundir=rundir
                                     ))
                             else:
                                 if download:
-                                        # Ensure that msg and warning text are together in TestStatus.log                                    logger.warning(
+                                    # Ensure that msg and warning text are together in TestStatus.log
+                                    logger.warning(
                                         msg
                                         + "\n    Cannot download file since it lives outside of the input_data_root '{}'".format(
                                             input_data_root
@@ -570,13 +592,16 @@ def _check_input_data_impl(
                             )
                             if full_path not in seen_paths:
                                 seen_paths.add(full_path)
-                                missing_tasks.append(DownloadTask(
-                                    task_type=TaskType.STANDARD,
+                                missing_tasks.append(DownloadTask.from_standard(
                                     msg=msg,
-                                    full_path=full_path,
                                     rel_path=rel_path,
                                     isdirectory=isdirectory,
-                                    use_ic_path=use_ic_path
+                                    use_ic_path=use_ic_path,
+                                    input_ic_root=input_ic_root,
+                                    input_data_root=input_data_root,
+                                    ic_filepath=ic_filepath,
+                                    chksum=chksum,
+                                    rundir=rundir
                                 ))
                         else:
                             if chksum:
@@ -614,42 +639,21 @@ def _check_input_data_impl(
                     print(msg)
                 
                 start_time = time.time()
-                success = False
+                
+                if task.pre_create_dir and not os.path.exists(task.pre_create_dir):
+                    logger.info("Creating directory {}".format(task.pre_create_dir))
+                    os.makedirs(task.pre_create_dir)
 
-                if task.type == TaskType.RUNDIR:
-                    full_path = task.full_path
-                    rundir = task.rundir
-                    isdirectory = task.isdirectory
-                    filepath = os.path.dirname(full_path)
-                    if not os.path.exists(filepath):
-                        logger.info("Creating directory {}".format(filepath))
-                        os.makedirs(filepath)
-                    tmppath = full_path[len(rundir) + 1 :]
-                    success = _download_if_in_repo(
-                        server,
-                        os.path.join(rundir, "inputdata"),
-                        tmppath[10:],
-                        isdirectory=isdirectory,
-                        ic_filepath="/",
-                    )
-                elif task.type == TaskType.STANDARD:
-                    use_ic_path = task.use_ic_path
-                    rel_path = task.rel_path
-                    isdirectory = task.isdirectory
-                    success = _download_if_in_repo(
-                        server,
-                        input_ic_root if use_ic_path else input_data_root,
-                        rel_path.strip(os.sep),
-                        isdirectory=isdirectory,
-                        ic_filepath=ic_filepath,
-                    )
-                    if success and chksum:
-                        verify_chksum(
-                            input_data_root,
-                            rundir,
-                            rel_path.strip(os.sep),
-                            isdirectory,
-                        )
+                success = _download_if_in_repo(
+                    server,
+                    task.input_dir,
+                    task.rel_path,
+                    isdirectory=task.isdirectory,
+                    ic_filepath=task.ic_filepath,
+                )
+
+                if success and task.verify_chksum_args:
+                    verify_chksum(*task.verify_chksum_args)
 
                 elapsed = time.time() - start_time
                 if success:
