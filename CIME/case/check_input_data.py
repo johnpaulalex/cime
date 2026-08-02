@@ -6,7 +6,7 @@ from CIME.utils import SharedArea, find_files, safe_copy, expect
 from CIME.XML.inputdata import Inputdata
 import CIME.Servers
 
-import glob, hashlib, shutil
+import glob, hashlib, shutil, time
 from enum import Enum, auto
 
 class TaskType(Enum):
@@ -590,12 +590,19 @@ def _check_input_data_impl(
                     )
 
     if missing_tasks:
-        for task in missing_tasks:
+        total_tasks = len(missing_tasks)
+        for idx, task in enumerate(missing_tasks, 1):
             msg = task.msg
             if not download:
                 print(msg)
                 no_files_missing = False
             else:
+                if total_tasks > 1:
+                    print("{} (File {} of {} to download)".format(msg, idx, total_tasks))
+                else:
+                    print(msg)
+                
+                start_time = time.time()
                 success = False
 
                 if task.type == TaskType.RUNDIR:
@@ -642,7 +649,12 @@ def _check_input_data_impl(
                             isdirectory,
                         )
 
-                if not success:
+                elapsed = time.time() - start_time
+                if success:
+                    print("  - Download completed in {:.2f} seconds".format(elapsed))
+                    # no_files_missing is not updated to False, we assume True initially
+                else:
+                    print("  - Download failed after {:.2f} seconds".format(elapsed))
                     no_files_missing = False
 
     return no_files_missing
