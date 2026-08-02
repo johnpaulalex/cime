@@ -10,18 +10,25 @@ import glob, hashlib, shutil, time
 from enum import Enum, auto
 
 class TaskType(Enum):
-    RUNDIR = auto()
-    STANDARD = auto()
+    """
+    Indicates how the missing file should be handled during the download phase.
+    """
+    RUNDIR = auto()    # The file belongs in the run directory (e.g. for creating a directory structure in rundir/inputdata)
+    STANDARD = auto()  # The file belongs in the standard input data root or initial condition (IC) root
 
 class DownloadTask:
+    """
+    Represents a missing file that needs to be downloaded.
+    """
     def __init__(self, task_type, msg, full_path, rel_path, isdirectory, use_ic_path=False, rundir=None):
         self.type = task_type
         self.msg = msg
         self.full_path = full_path
         self.rel_path = rel_path
         self.isdirectory = isdirectory
-        self.use_ic_path = use_ic_path
-        self.rundir = rundir
+        # The following fields apply only to specific TaskTypes:
+        self.use_ic_path = use_ic_path # Applies to TaskType.STANDARD: indicates if file belongs in input_ic_root rather than input_data_root
+        self.rundir = rundir           # Applies to TaskType.RUNDIR: the path to the run directory
 
 
 logger = logging.getLogger(__name__)
@@ -629,22 +636,13 @@ def _check_input_data_impl(
                     use_ic_path = task.use_ic_path
                     rel_path = task.rel_path
                     isdirectory = task.isdirectory
-                    if use_ic_path:
-                        success = _download_if_in_repo(
-                            server,
-                            input_ic_root,
-                            rel_path.strip(os.sep),
-                            isdirectory=isdirectory,
-                            ic_filepath=ic_filepath,
-                        )
-                    else:
-                        success = _download_if_in_repo(
-                            server,
-                            input_data_root,
-                            rel_path.strip(os.sep),
-                            isdirectory=isdirectory,
-                            ic_filepath=ic_filepath,
-                        )
+                    success = _download_if_in_repo(
+                        server,
+                        input_ic_root if use_ic_path else input_data_root,
+                        rel_path.strip(os.sep),
+                        isdirectory=isdirectory,
+                        ic_filepath=ic_filepath,
+                    )
                     if success and chksum:
                         verify_chksum(
                             input_data_root,
