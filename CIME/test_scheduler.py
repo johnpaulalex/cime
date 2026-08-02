@@ -59,7 +59,7 @@ PHASES = [
     SETUP_PHASE,
     SHAREDLIB_BUILD_PHASE,
     MODEL_BUILD_PHASE,
-    SCHEDULE_RUN_PHASE,
+    RUN_PHASE,
 ]  # Order matters
 
 
@@ -408,7 +408,7 @@ class TestScheduler(object):
             self._phases.remove(SHAREDLIB_BUILD_PHASE)
             self._phases.remove(MODEL_BUILD_PHASE)
         if self._no_run:
-            self._phases.remove(SCHEDULE_RUN_PHASE)
+            self._phases.remove(RUN_PHASE)
 
         if use_existing:
             for test in self._tests:
@@ -437,7 +437,7 @@ class TestScheduler(object):
                                     )
                                     self._update_test_status(test, phase, status)
 
-                                    if phase == SCHEDULE_RUN_PHASE:
+                                    if phase == RUN_PHASE:
                                         logger.info(
                                             "Test {} passed and will not be re-run".format(
                                                 test
@@ -616,7 +616,7 @@ class TestScheduler(object):
             else:
                 # We don't want "RUN PASSED" in the TestStatus.log if the only thing that
                 # succeeded was the submission.
-                phase = "SUBMIT" if phase == SCHEDULE_RUN_PHASE else phase
+                phase = "SUBMIT" if phase == RUN_PHASE else phase
                 self._log_output(
                     test,
                     "{} PASSED for test '{}'.\nCommand: {}\nOutput: {}\n".format(
@@ -1098,9 +1098,9 @@ class TestScheduler(object):
             case_opts is not None
             and "B" in case_opts  # pylint: disable=unsupported-membership-test
         ):
-            self._log_output(test, "{} SKIPPED for test '{}'".format(SCHEDULE_RUN_PHASE, test))
+            self._log_output(test, "{} SKIPPED for test '{}'".format(RUN_PHASE, test))
             self._update_test_status_file(test, SUBMIT_PHASE, TEST_PASS_STATUS)
-            self._update_test_status_file(test, SCHEDULE_RUN_PHASE, TEST_PASS_STATUS)
+            self._update_test_status_file(test, RUN_PHASE, TEST_PASS_STATUS)
 
             return True, "SKIPPED"
         else:
@@ -1116,7 +1116,7 @@ class TestScheduler(object):
             if self._chksum:
                 cmd += " --chksum"
 
-            return self._shell_cmd_for_phase(test, cmd, SCHEDULE_RUN_PHASE, from_dir=test_dir)
+            return self._shell_cmd_for_phase(test, cmd, RUN_PHASE, from_dir=test_dir)
 
     ###########################################################################
     def _run_catch_exceptions(self, test, phase, run):
@@ -1156,7 +1156,7 @@ class TestScheduler(object):
                 else:
                     return 1
 
-        if phase == SCHEDULE_RUN_PHASE and (self._no_batch or no_batch):
+        if phase == RUN_PHASE and (self._no_batch or no_batch):
             test_dir = self._get_test_dir(test)
             total_pes = EnvMachPes(test_dir, read_only=True).get_value("TOTALPES")
             return total_pes
@@ -1214,7 +1214,7 @@ class TestScheduler(object):
         status = (
             (
                 TEST_PEND_STATUS
-                if test_phase == SCHEDULE_RUN_PHASE and not self._no_batch
+                if test_phase == RUN_PHASE and not self._no_batch
                 else TEST_PASS_STATUS
             )
             if success
@@ -1224,15 +1224,17 @@ class TestScheduler(object):
         if status != TEST_PEND_STATUS:
             self._update_test_status(test, test_phase, status)
 
+        phase_str = f"scheduling of {test_phase}" if test_phase == RUN_PHASE and status == TEST_PEND_STATUS else test_phase
+
         if not self._work_remains(test):
             self._completed_tests += 1
             total = len(self._tests)
             status_str = "Finished {} for test {} in {:f} seconds ({}). [COMPLETED {:d} of {:d}]".format(
-                test_phase, test, elapsed_time, status, self._completed_tests, total
+                phase_str, test, elapsed_time, status, self._completed_tests, total
             )
         else:
             status_str = "Finished {} for test {} in {:f} seconds ({})".format(
-                test_phase, test, elapsed_time, status
+                phase_str, test, elapsed_time, status
             )
 
         if not success:
@@ -1269,14 +1271,14 @@ class TestScheduler(object):
             and test_phase == MODEL_BUILD_PHASE
         ):
             logger.info(
-                "Starting {} for test {} with 1 proc on interactive node and {:d} procs on compute nodes".format(
-                    SCHEDULE_RUN_PHASE,
+                "Starting scheduling of {} for test {} with 1 proc on interactive node and {:d} procs on compute nodes".format(
+                    RUN_PHASE,
                     test,
-                    self._get_procs_needed(test, SCHEDULE_RUN_PHASE, no_batch=True),
+                    self._get_procs_needed(test, RUN_PHASE, no_batch=True),
                 )
             )
-            self._update_test_status(test, SCHEDULE_RUN_PHASE, TEST_PEND_STATUS)
-            self._consumer(test, SCHEDULE_RUN_PHASE, self._run_phase)
+            self._update_test_status(test, RUN_PHASE, TEST_PEND_STATUS)
+            self._consumer(test, RUN_PHASE, self._run_phase)
 
     ###########################################################################
     def _producer_indv_test_launch(self, test, threads_in_flight):
@@ -1295,13 +1297,13 @@ class TestScheduler(object):
 
         elif procs_needed > self._proc_pool:
             # This test is asking for more than we can ever provide
-            # This should only ever happen for SCHEDULE_RUN_PHASE
+            # This should only ever happen for RUN_PHASE
             msg = f"Test {test} phase {next_phase} requested more ({procs_needed}) than entire pool (self._proc_pool)"
-            expect(next_phase == SCHEDULE_RUN_PHASE, msg)
+            expect(next_phase == RUN_PHASE, msg)
 
             # CIME phase won't be run, so we need to update TEST_STATUS ourselves
             self._update_test_status_file(test, SUBMIT_PHASE, TEST_PASS_STATUS)
-            self._update_test_status_file(test, SCHEDULE_RUN_PHASE, TEST_FAIL_STATUS)
+            self._update_test_status_file(test, RUN_PHASE, TEST_FAIL_STATUS)
 
             # Update our internal state that this test failed
             self._update_test_status(test, next_phase, TEST_PEND_STATUS)

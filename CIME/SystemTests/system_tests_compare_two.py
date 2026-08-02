@@ -261,7 +261,7 @@ class SystemTestsCompareTwo(SystemTestsCommon):
 
         # On a batch system with a multisubmit test "RESUBMIT" is used to track
         # which phase is being ran. By the end of the test it equals 0. If the
-        # the test fails in a way where the SCHEDULE_RUN_PHASE is PEND then "RESUBMIT"
+        # the test fails in a way where the RUN_PHASE is PEND then "RESUBMIT"
         # does not get reset to 1 on a rerun and the first phase is skiped
         # causing the COMPARE_PHASE to fail. This ensures that "RESUBMIT" will
         # get reset if the test state is not correct for a rerun.
@@ -271,7 +271,7 @@ class SystemTestsCompareTwo(SystemTestsCommon):
             and self._multisubmit
             and self._case1.get_value("RESUBMIT") == 0
         ):
-            self._resetup_case(SCHEDULE_RUN_PHASE, reset=True)
+            self._resetup_case(RUN_PHASE, reset=True)
 
         first_phase = (
             self._case1.get_value("RESUBMIT") == 1

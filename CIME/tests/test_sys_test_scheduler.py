@@ -51,7 +51,7 @@ class TestTestScheduler(base.BaseTestCase):
             _shell_cmd_for_phase.assert_called_with(
                 "SEQ_Ln9.f19_g16.A.perlmutter_gnu",
                 "./case.submit --skip-preview-namelist --chksum",
-                "SCHEDULE_RUN",
+                "RUN",
                 from_dir="/tests/SEQ_Ln9.f19_g16.A.perlmutter_gnu.00:00:00",
             )
 
@@ -166,7 +166,7 @@ class TestTestScheduler(base.BaseTestCase):
                         self.assertFalse(ct._is_broken(test))
                         self.assertTrue(ct._work_remains(test))
 
-                elif phase == test_status.SCHEDULE_RUN_PHASE:
+                elif phase == test_status.RUN_PHASE:
                     if test == build_fail_test:
                         with self.assertRaises(utils.CIMEError):
                             ct._update_test_status(
@@ -299,11 +299,11 @@ class TestTestScheduler(base.BaseTestCase):
                 )
             elif test_name == run_fail_test:
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_FAIL_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_FAIL_STATUS
                 )
             elif test_name == run_fail_exc_test:
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_FAIL_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_FAIL_STATUS
                 )
                 data = open(log_file, "r").read()
                 self.assertTrue(
@@ -318,18 +318,18 @@ class TestTestScheduler(base.BaseTestCase):
                     test_status.TEST_FAIL_STATUS,
                 )
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
                 )
             elif test_name == test_diff_test:
                 self.assert_test_status(
                     test_name, ts, "COMPARE_base_rest", test_status.TEST_FAIL_STATUS
                 )
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
                 )
             elif test_name == st_arch_fail_test:
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
                 )
                 self.assert_test_status(
                     test_name,
@@ -340,7 +340,7 @@ class TestTestScheduler(base.BaseTestCase):
             else:
                 self.assertTrue(test_name in [pass_test, mem_pass_test])
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
                 )
                 if test_name == mem_pass_test:
                     self.assert_test_status(
@@ -459,7 +459,7 @@ class TestTestScheduler(base.BaseTestCase):
                     )
             elif test_name == run_fail_test:
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_FAIL_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_FAIL_STATUS
                 )
                 with test_status.TestStatus(test_dir=casedir) as ts:
                     ts.set_status(
@@ -480,7 +480,7 @@ class TestTestScheduler(base.BaseTestCase):
                     test_status.TEST_PASS_STATUS,
                 )
                 self.assert_test_status(
-                    test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                    test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
                 )
 
         os.environ["TESTBUILDFAIL_PASS"] = "True"
@@ -519,7 +519,7 @@ class TestTestScheduler(base.BaseTestCase):
                 test_name, ts, test_status.SUBMIT_PHASE, test_status.TEST_PASS_STATUS
             )
             self.assert_test_status(
-                test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
             )
 
         del os.environ["TESTBUILDFAIL_PASS"]
@@ -561,7 +561,7 @@ class TestTestScheduler(base.BaseTestCase):
                 test_name, ts, test_status.SUBMIT_PHASE, test_status.TEST_PASS_STATUS
             )
             self.assert_test_status(
-                test_name, ts, test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS
+                test_name, ts, test_status.RUN_PHASE, test_status.TEST_PASS_STATUS
             )
 
     def test_d_retry(self):

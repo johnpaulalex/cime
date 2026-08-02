@@ -10,7 +10,7 @@ context manager. Example:
 .. code-block:: python
 
     with TestStatus(test_dir=caseroot) as ts:
-        ts.set_status(SCHEDULE_RUN_PHASE, TEST_PASS_STATUS)
+        ts.set_status(RUN_PHASE, TEST_PASS_STATUS)
 
 This file also contains all of the hardcoded phase information which includes
 the phase names, phase orders, potential phase states, and which phases are
@@ -62,7 +62,7 @@ NAMELIST_PHASE = "NLCOMP"
 SHAREDLIB_BUILD_PHASE = "SHAREDLIB_BUILD"
 MODEL_BUILD_PHASE = "MODEL_BUILD"
 SUBMIT_PHASE = "SUBMIT"
-SCHEDULE_RUN_PHASE = "SCHEDULE_RUN"
+RUN_PHASE = "RUN"
 THROUGHPUT_PHASE = "TPUTCOMP"
 MEMCOMP_PHASE = "MEMCOMP"
 MEMLEAK_PHASE = "MEMLEAK"
@@ -79,7 +79,7 @@ ALL_PHASES = [
     SHAREDLIB_BUILD_PHASE,
     MODEL_BUILD_PHASE,
     SUBMIT_PHASE,
-    SCHEDULE_RUN_PHASE,
+    RUN_PHASE,
     COMPARE_PHASE,
     BASELINE_PHASE,
     THROUGHPUT_PHASE,
@@ -97,7 +97,7 @@ CORE_PHASES = [
     SHAREDLIB_BUILD_PHASE,
     MODEL_BUILD_PHASE,
     SUBMIT_PHASE,
-    SCHEDULE_RUN_PHASE,
+    RUN_PHASE,
 ]
 
 
@@ -433,10 +433,10 @@ class TestStatus(object):
             ):
                 phase_responsible_for_status = phase
 
-            if phase == SCHEDULE_RUN_PHASE:
+            if phase == RUN_PHASE:
                 run_phase_found = True
 
-            if phase in [SUBMIT_PHASE, SCHEDULE_RUN_PHASE] and no_run:
+            if phase in [SUBMIT_PHASE, RUN_PHASE] and no_run:
                 break
 
             if status == TEST_PEND_STATUS and rv in [
@@ -491,7 +491,7 @@ class TestStatus(object):
             and not run_phase_found
             and wait_for_run
         ):
-            phase_responsible_for_status = SCHEDULE_RUN_PHASE
+            phase_responsible_for_status = RUN_PHASE
             rv = TEST_PEND_STATUS
 
         return rv, phase_responsible_for_status
@@ -511,59 +511,59 @@ class TestStatus(object):
         is given to PEND since we don't want to stop waiting for a test
         that hasn't finished. Namelist diffs are given the lowest precedence.
 
-        >>> _test_helper2('PASS ERS.foo.A SCHEDULE_RUN')
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A SHAREDLIB_BUILD\nPEND ERS.foo.A SCHEDULE_RUN')
-        ('PEND', 'SCHEDULE_RUN')
-        >>> _test_helper2('FAIL ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A SCHEDULE_RUN')
+        >>> _test_helper2('PASS ERS.foo.A RUN')
+        ('PASS', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A SHAREDLIB_BUILD\nPEND ERS.foo.A RUN')
+        ('PEND', 'RUN')
+        >>> _test_helper2('FAIL ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A RUN')
         ('FAIL', 'MODEL_BUILD')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPASS ERS.foo.A SCHEDULE_RUN')
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A TPUTCOMP')
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A TPUTCOMP', check_throughput=True)
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPASS ERS.foo.A RUN')
+        ('PASS', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A RUN\nFAIL ERS.foo.A TPUTCOMP')
+        ('PASS', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A RUN\nFAIL ERS.foo.A TPUTCOMP', check_throughput=True)
         ('DIFF', 'TPUTCOMP')
-        >>> _test_helper2('PASS ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A MEMCOMP', check_memory=True)
+        >>> _test_helper2('PASS ERS.foo.A RUN\nFAIL ERS.foo.A MEMCOMP', check_memory=True)
         ('DIFF', 'MEMCOMP')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPASS ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A NLCOMP')
-        ('NLFAIL', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A NLCOMP')
-        ('PEND', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A MEMCOMP')
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A SCHEDULE_RUN\nFAIL ERS.foo.A NLCOMP', ignore_namelists=True)
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A COMPARE_1\nFAIL ERS.foo.A NLCOMP\nFAIL ERS.foo.A COMPARE_2\nPASS ERS.foo.A SCHEDULE_RUN')
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPASS ERS.foo.A RUN\nFAIL ERS.foo.A NLCOMP')
+        ('NLFAIL', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A RUN\nFAIL ERS.foo.A NLCOMP')
+        ('PEND', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A RUN\nFAIL ERS.foo.A MEMCOMP')
+        ('PASS', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A RUN\nFAIL ERS.foo.A NLCOMP', ignore_namelists=True)
+        ('PASS', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A COMPARE_1\nFAIL ERS.foo.A NLCOMP\nFAIL ERS.foo.A COMPARE_2\nPASS ERS.foo.A RUN')
         ('FAIL', 'COMPARE_2')
-        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nFAIL ERS.foo.A NLCOMP\nPASS ERS.foo.A COMPARE_2\nPASS ERS.foo.A SCHEDULE_RUN')
+        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nFAIL ERS.foo.A NLCOMP\nPASS ERS.foo.A COMPARE_2\nPASS ERS.foo.A RUN')
         ('DIFF', 'BASELINE')
-        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nPASS ERS.foo.A NLCOMP\nPASS ERS.foo.A COMPARE_2\nPASS ERS.foo.A SCHEDULE_RUN', ignore_diffs=True)
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nFAIL ERS.foo.A NLCOMP\nPASS ERS.foo.A COMPARE_2\nPASS ERS.foo.A SCHEDULE_RUN', ignore_diffs=True)
-        ('NLFAIL', 'SCHEDULE_RUN')
-        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nFAIL ERS.foo.A NLCOMP\nFAIL ERS.foo.A COMPARE_2\nPASS ERS.foo.A SCHEDULE_RUN')
+        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nPASS ERS.foo.A NLCOMP\nPASS ERS.foo.A COMPARE_2\nPASS ERS.foo.A RUN', ignore_diffs=True)
+        ('PASS', 'RUN')
+        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nFAIL ERS.foo.A NLCOMP\nPASS ERS.foo.A COMPARE_2\nPASS ERS.foo.A RUN', ignore_diffs=True)
+        ('NLFAIL', 'RUN')
+        >>> _test_helper2('FAIL ERS.foo.A BASELINE\nFAIL ERS.foo.A NLCOMP\nFAIL ERS.foo.A COMPARE_2\nPASS ERS.foo.A RUN')
         ('FAIL', 'COMPARE_2')
-        >>> _test_helper2('PEND ERS.foo.A COMPARE_2\nFAIL ERS.foo.A SCHEDULE_RUN')
-        ('FAIL', 'SCHEDULE_RUN')
-        >>> _test_helper2('PEND ERS.foo.A COMPARE_2\nPASS ERS.foo.A SCHEDULE_RUN')
+        >>> _test_helper2('PEND ERS.foo.A COMPARE_2\nFAIL ERS.foo.A RUN')
+        ('FAIL', 'RUN')
+        >>> _test_helper2('PEND ERS.foo.A COMPARE_2\nPASS ERS.foo.A RUN')
         ('PEND', 'COMPARE_2')
         >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD')
         ('PASS', 'MODEL_BUILD')
-        >>> _test_helper2('PEND ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A SCHEDULE_RUN')
+        >>> _test_helper2('PEND ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A RUN')
         ('PEND', 'MODEL_BUILD')
         >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD', wait_for_run=True)
-        ('PEND', 'SCHEDULE_RUN')
+        ('PEND', 'RUN')
         >>> _test_helper2('FAIL ERS.foo.A MODEL_BUILD', wait_for_run=True)
         ('FAIL', 'MODEL_BUILD')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A SCHEDULE_RUN', wait_for_run=True)
-        ('PEND', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nFAIL ERS.foo.A SCHEDULE_RUN', wait_for_run=True)
-        ('FAIL', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPASS ERS.foo.A SCHEDULE_RUN', wait_for_run=True)
-        ('PASS', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nFAIL ERS.foo.A SCHEDULE_RUN\nPEND ERS.foo.A COMPARE')
-        ('FAIL', 'SCHEDULE_RUN')
-        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A SCHEDULE_RUN', no_run=True)
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A RUN', wait_for_run=True)
+        ('PEND', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nFAIL ERS.foo.A RUN', wait_for_run=True)
+        ('FAIL', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPASS ERS.foo.A RUN', wait_for_run=True)
+        ('PASS', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nFAIL ERS.foo.A RUN\nPEND ERS.foo.A COMPARE')
+        ('FAIL', 'RUN')
+        >>> _test_helper2('PASS ERS.foo.A MODEL_BUILD\nPEND ERS.foo.A RUN', no_run=True)
         ('PASS', 'MODEL_BUILD')
         >>> s = '''PASS ERS.foo.A CREATE_NEWCASE
         ... PASS ERS.foo.A XML
@@ -572,7 +572,7 @@ class TestStatus(object):
         ... PASS ERS.foo.A NLCOMP
         ... PASS ERS.foo.A MODEL_BUILD time=363
         ... PASS ERS.foo.A SUBMIT
-        ... PASS ERS.foo.A SCHEDULE_RUN time=73
+        ... PASS ERS.foo.A RUN time=73
         ... PEND ERS.foo.A COMPARE_base_single_thread
         ... FAIL ERS.foo.A BASELINE master: DIFF
         ... PASS ERS.foo.A TPUTCOMP

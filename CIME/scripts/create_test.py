@@ -28,7 +28,7 @@ https://github.com/ESMCI/cime
 """
 from CIME.Tools.standard_script_setup import *
 from CIME import get_tests
-from CIME.test_scheduler import TestScheduler, SCHEDULE_RUN_PHASE
+from CIME.test_scheduler import TestScheduler, RUN_PHASE
 from CIME import utils
 from CIME.utils import (
     expect,
@@ -1025,7 +1025,7 @@ def create_test(
         largest_case = 0
         for test in impl._tests:
             test_dir = impl._get_test_dir(test)
-            procs_needed = impl._get_procs_needed(test, SCHEDULE_RUN_PHASE)
+            procs_needed = impl._get_procs_needed(test, RUN_PHASE)
             time_needed = convert_to_seconds(
                 run_cmd_no_fail(
                     "./xmlquery JOB_WALLCLOCK_TIME -value -subgroup case.test",

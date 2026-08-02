@@ -168,7 +168,7 @@ def case_cmpgen_namelists(
                 success, output = _do_full_nl_comp(
                     self, test_name, compare_name, baseline_root
                 )
-                if not success and ts.get_status(SCHEDULE_RUN_PHASE) is not None:
+                if not success and ts.get_status(RUN_PHASE) is not None:
                     run_warn = """NOTE: It is not necessarily safe to compare namelists after RUN
 phase has completed. Running a case can pollute namelists. The namelists
 kept in the baselines are pre-RUN namelists."""

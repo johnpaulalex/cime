@@ -42,13 +42,13 @@ class TestTestStatus(CustomAssertionsTestStatus):
             self._ts.set_status(phase, status)
 
     def test_get_latest_phase(self):
-        assert self._ts.get_latest_phase() == test_status.SCHEDULE_RUN_PHASE
+        assert self._ts.get_latest_phase() == test_status.RUN_PHASE
 
     def test_current_is(self):
-        assert self._ts.current_is(test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PASS_STATUS)
+        assert self._ts.current_is(test_status.RUN_PHASE, test_status.TEST_PASS_STATUS)
 
         assert not self._ts.current_is(
-            test_status.SCHEDULE_RUN_PHASE, test_status.TEST_PEND_STATUS
+            test_status.RUN_PHASE, test_status.TEST_PEND_STATUS
         )
 
         assert not self._ts.current_is(

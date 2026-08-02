@@ -432,7 +432,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "FAIL", "FAIL", "FAIL"]
 
         case = Case.return_value.__enter__.return_value
@@ -549,7 +549,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["FAIL", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -585,7 +585,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "FAIL"]
 
         case = Case.return_value.__enter__.return_value
@@ -615,7 +615,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS"] * 10
 
         case = Case.return_value.__enter__.return_value
@@ -663,7 +663,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.HOMME.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "PASS", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -711,7 +711,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "PASS", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -759,7 +759,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "PASS", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -786,7 +786,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["FAIL"] + ["PASS"] * 9
 
         case = Case.return_value.__enter__.return_value
@@ -825,7 +825,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["FAIL"] + ["PASS"] * 9
 
         case = Case.return_value.__enter__.return_value
@@ -852,7 +852,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "PASS", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -879,7 +879,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "PASS", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -905,7 +905,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS"] * 10
 
         case = Case.return_value.__enter__.return_value
@@ -969,7 +969,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         ts = TestStatus.return_value
         ts.get_name.return_value = "SMS.f19_g16.S.docker_gnu"
-        ts.get_overall_test_status.return_value = ("PASS", "SCHEDULE_RUN")
+        ts.get_overall_test_status.return_value = ("PASS", "RUN")
         ts.get_status.side_effect = ["PASS", "PASS", "PASS", "PASS", "PASS"]
 
         case = Case.return_value.__enter__.return_value
@@ -993,7 +993,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "PASS", True, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "PASS", True, "RUN"
         )
 
         assert needed
@@ -1004,14 +1004,14 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         # get_status() calls in is_hist_bless_needed()
         ts.get_status.side_effect = [
-            "PASS",  # Check of SCHEDULE_RUN_PHASE at top of function
+            "PASS",  # Check of RUN_PHASE at top of function
             "PASS",  # Check of GENERATE_PHASE
         ]
 
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "FAIL", False, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "FAIL", False, "RUN"
         )
 
         assert not needed
@@ -1022,7 +1022,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
 
         # First two get_status() calls in is_hist_bless_needed()
         side_effect = [
-            "PASS",  # Check of SCHEDULE_RUN_PHASE at top of function
+            "PASS",  # Check of RUN_PHASE at top of function
             "FAIL",  # Check of GENERATE_PHASE
         ]
         # Checks in `for p in ALL_PHASES` loop
@@ -1033,7 +1033,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "FAIL", False, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "FAIL", False, "RUN"
         )
 
         assert needed
@@ -1045,7 +1045,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "RUN"
         )
 
         assert needed
@@ -1060,7 +1060,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "RUN"
         )
 
         assert not needed
@@ -1073,7 +1073,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "RUN"
         )
 
         assert not needed
@@ -1086,7 +1086,7 @@ class TestUnitBlessTestResults(unittest.TestCase):
         broken_blesses = []
 
         needed = is_hist_bless_needed(
-            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "SCHEDULE_RUN"
+            "SMS.f19_g16.A", ts, broken_blesses, "PASS", False, "RUN"
         )
 
         assert not needed

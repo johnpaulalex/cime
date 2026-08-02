@@ -114,7 +114,7 @@ def compare_test_results(
             if not namelists_only and not build_only:
                 compare_result = None
                 compare_comment = ""
-                run_result = ts.get_status(SCHEDULE_RUN_PHASE)
+                run_result = ts.get_status(RUN_PHASE)
                 if run_result is None:
                     compare_result = "SKIP"
                     compare_comment = "Test did not make it to run phase"

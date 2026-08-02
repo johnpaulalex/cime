@@ -274,14 +274,14 @@ def make_fake_teststatus(path, testname, status, phase):
                 ts.set_status(
                     core_phase,
                     status,
-                    comments=("time=42" if phase == test_status.SCHEDULE_RUN_PHASE else ""),
+                    comments=("time=42" if phase == test_status.RUN_PHASE else ""),
                 )
                 break
             else:
                 ts.set_status(
                     core_phase,
                     test_status.TEST_PASS_STATUS,
-                    comments=("time=42" if phase == test_status.SCHEDULE_RUN_PHASE else ""),
+                    comments=("time=42" if phase == test_status.RUN_PHASE else ""),
                 )
 
 

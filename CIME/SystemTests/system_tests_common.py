@@ -430,7 +430,7 @@ class SystemTestsCommon(object):
         self._dry_run = dry_run
         self._user_separate_builds = separate_builds
 
-        was_run_pend = self._test_status.current_is(SCHEDULE_RUN_PHASE, TEST_PEND_STATUS)
+        was_run_pend = self._test_status.current_is(RUN_PHASE, TEST_PEND_STATUS)
 
         for phase_name, phase_bool in [
             (SHAREDLIB_BUILD_PHASE, not model_only),
@@ -530,10 +530,10 @@ class SystemTestsCommon(object):
             self._skip_pnl = skip_pnl
 
         try:
-            self._resetup_case(SCHEDULE_RUN_PHASE)
+            self._resetup_case(RUN_PHASE)
             do_baseline_ops = True
             with self._test_status:
-                self._test_status.set_status(SCHEDULE_RUN_PHASE, TEST_PEND_STATUS)
+                self._test_status.set_status(RUN_PHASE, TEST_PEND_STATUS)
 
             # We do not want to do multiple repetitions of baseline operations for
             # multi-submit tests. We just want to do them upon the final submission.
@@ -588,7 +588,7 @@ class SystemTestsCommon(object):
             status = TEST_PASS_STATUS if success else TEST_FAIL_STATUS
             with self._test_status:
                 self._test_status.set_status(
-                    SCHEDULE_RUN_PHASE, status, comments=("time={:d}".format(int(time_taken)))
+                    RUN_PHASE, status, comments=("time={:d}".format(int(time_taken)))
                 )
 
             config = Config.instance()
