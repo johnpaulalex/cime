@@ -8,9 +8,14 @@ from CIME.Servers.generic_server import GenericServer
 logger = logging.getLogger(__name__)
 
 
+import socket
+
 class WGET(GenericServer):
     def __init__(self, address, user="", passwd=""):
-        self._args = "--no-check-certificate "
+        if "derecho" in socket.getfqdn():
+            self._args = "--no-check-certificate "
+        else:
+            self._args = "--no-check-certificate --read-timeout=300 --tries=3 "
         if user:
             self._args += "--user {} ".format(user)
         if passwd:
@@ -19,7 +24,10 @@ class WGET(GenericServer):
 
     @classmethod
     def wget_login(cls, address, user="", passwd=""):
-        args = "--no-check-certificate "
+        if "derecho" in socket.getfqdn():
+            args = "--no-check-certificate "
+        else:
+            args = "--no-check-certificate --read-timeout=300 --tries=3 "
         if user:
             args += "--user {} ".format(user)
         if passwd:

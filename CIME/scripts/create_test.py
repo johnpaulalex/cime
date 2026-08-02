@@ -500,6 +500,10 @@ def parse_command_line(args, description):
         "--chksum", action="store_true", help="Verifies input data checksums."
     )
 
+    parser.add_argument(
+        "--fail-download", action="store_true", help="Fails the test setup if any input data needs to be downloaded."
+    )
+
     srcroot_default = utils.get_src_root()
 
     parser.add_argument(
@@ -630,6 +634,9 @@ def parse_command_line(args, description):
             CIME.utils.check_name(args.test_id, additional_chars="."),
             "invalid test-id argument provided",
         )
+
+    if args.fail_download:
+        os.environ["CIME_FAIL_DOWNLOAD"] = "1"
 
     if args.testfile is not None:
         with open(args.testfile, "r") as fd:
