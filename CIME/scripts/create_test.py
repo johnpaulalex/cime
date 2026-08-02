@@ -501,7 +501,7 @@ def parse_command_line(args, description):
     )
 
     parser.add_argument(
-        "--fail-download", action="store_true", help="Fails the test setup if any input data needs to be downloaded."
+        "--fail-on-download", action="store_true", help="Fails the test setup if any input data needs to be downloaded."
     )
 
     srcroot_default = utils.get_src_root()
@@ -635,8 +635,8 @@ def parse_command_line(args, description):
             "invalid test-id argument provided",
         )
 
-    if args.fail_download:
-        os.environ["CIME_FAIL_DOWNLOAD"] = "1"
+    if args.fail_on_download:
+        os.environ["CIME_FAIL_ON_DOWNLOAD"] = "1"
 
     if args.testfile is not None:
         with open(args.testfile, "r") as fd:
